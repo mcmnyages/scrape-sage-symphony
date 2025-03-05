@@ -145,7 +145,7 @@ const ScrapeForm = () => {
               <Label htmlFor="url">Website URL</Label>
               <div className="flex items-center">
                 <div className="relative flex-grow">
-                  <Glob className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                  <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                   <Input
                     id="url"
                     placeholder="https://example.com"
