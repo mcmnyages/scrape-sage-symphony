@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipArrow } from "@/components/ui/tooltip";
 
 interface HistoryDrawerProps {
   onSelectResult: (result: ScrapeResult) => void;
@@ -103,13 +103,16 @@ const HistoryDrawer = ({ onSelectResult }: HistoryDrawerProps) => {
         <Tooltip>
           <TooltipTrigger asChild>
             <DrawerTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
+              <Button variant="outline" className="flex items-center gap-2 hover:bg-secondary/40 transition-colors duration-200">
+                <Clock className="h-4 w-4 text-primary/80" />
                 History
               </Button>
             </DrawerTrigger>
           </TooltipTrigger>
-          <TooltipContent side="bottom">View your scraping history</TooltipContent>
+          <TooltipContent side="bottom" className="bg-popover/95 backdrop-blur-sm border-primary/10">
+            <span>View your scraping history</span>
+            <TooltipArrow />
+          </TooltipContent>
         </Tooltip>
       </TooltipProvider>
       
@@ -124,15 +127,25 @@ const HistoryDrawer = ({ onSelectResult }: HistoryDrawerProps) => {
           </DrawerHeader>
           
           <div className="pr-6">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={refreshHistory}
-              className="flex items-center gap-1.5"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              Refresh
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={refreshHistory}
+                    className="flex items-center gap-1.5 hover:bg-secondary/30"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    Refresh
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <span>Refresh history list</span>
+                  <TooltipArrow />
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
         
@@ -144,7 +157,7 @@ const HistoryDrawer = ({ onSelectResult }: HistoryDrawerProps) => {
                 placeholder="Search by URL..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9"
+                className="pl-9 h-9 focus-visible:ring-primary/30"
               />
               {searchQuery && (
                 <Button 
@@ -194,7 +207,7 @@ const HistoryDrawer = ({ onSelectResult }: HistoryDrawerProps) => {
                 Showing {filteredHistory.length} of {history.length} results
               </div>
               {statusFilter !== "all" && (
-                <Badge variant="outline" className="flex items-center gap-1.5 h-6">
+                <Badge variant="outline" className="flex items-center gap-1.5 h-6 bg-secondary/20">
                   {statusFilter}
                   <Button 
                     size="icon" 
@@ -320,15 +333,25 @@ const HistoryDrawer = ({ onSelectResult }: HistoryDrawerProps) => {
         
         <DrawerFooter className="pt-2">
           <div className="flex space-x-2">
-            <Button 
-              variant="destructive" 
-              className="flex-1 flex items-center gap-2" 
-              onClick={handleClearHistory}
-              disabled={history.length === 0}
-            >
-              <Trash2 className="h-4 w-4" />
-              Clear History
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="destructive" 
+                    className="flex-1 flex items-center gap-2" 
+                    onClick={handleClearHistory}
+                    disabled={history.length === 0}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Clear History
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <span>Permanently delete all history items</span>
+                  <TooltipArrow />
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <DrawerClose asChild>
               <Button variant="outline" className="flex-1">Close</Button>
             </DrawerClose>

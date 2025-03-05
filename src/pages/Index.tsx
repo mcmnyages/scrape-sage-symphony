@@ -18,9 +18,9 @@ const Index = () => {
     <div className="min-h-screen relative">
       {/* Background gradients */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-100 dark:bg-purple-900/20 rounded-full blur-3xl opacity-30 animate-float" />
-        <div className="absolute top-[60%] right-[-5%] w-[30%] h-[30%] bg-blue-100 dark:bg-blue-900/20 rounded-full blur-3xl opacity-30 animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-[30%] left-[60%] w-[25%] h-[25%] bg-teal-100 dark:bg-teal-900/20 rounded-full blur-3xl opacity-30 animate-float" style={{ animationDelay: '4s' }} />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-100 dark:bg-purple-900/20 rounded-full blur-3xl opacity-30 animate-pulse" style={{ animationDuration: '12s' }} />
+        <div className="absolute top-[60%] right-[-5%] w-[30%] h-[30%] bg-blue-100 dark:bg-blue-900/20 rounded-full blur-3xl opacity-30 animate-pulse" style={{ animationDuration: '15s', animationDelay: '2s' }} />
+        <div className="absolute top-[30%] left-[60%] w-[25%] h-[25%] bg-teal-100 dark:bg-teal-900/20 rounded-full blur-3xl opacity-30 animate-pulse" style={{ animationDuration: '18s', animationDelay: '4s' }} />
       </div>
       
       <Header />
