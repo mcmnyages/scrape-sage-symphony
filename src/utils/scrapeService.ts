@@ -1,186 +1,133 @@
 
-// Type definitions
+// Mock implementation of a scrape service
+
+export type PatternType = 'css' | 'xpath' | 'regex' | 'json' | 'auto';
+
+export interface PatternRequest {
+  name: string;
+  type: PatternType;
+  selector: string;
+}
+
+export interface ScrapeOptions {
+  includeHtml?: boolean;
+  includeText?: boolean;
+  maxDepth?: number;
+  requestDelay?: number;
+  followLinks?: boolean;
+  respectRobotsTxt?: boolean;
+}
+
 export interface ScrapeRequest {
   url: string;
-  patterns: {
-    type: string;
-    selector: string;
-    name: string;
-  }[];
-  options?: {
-    delay?: number;
-    excludeElements?: string[];
-    includeHtml?: boolean;
-    includeText?: boolean;
-    followLinks?: boolean;
-    maxDepth?: number;
-  };
+  patterns: PatternRequest[];
+  options: ScrapeOptions;
 }
 
 export interface ScrapeResult {
-  id: string;
-  timestamp: number;
-  url: string;
-  data: any[];
   status: 'success' | 'error';
+  timestamp: string;
+  url: string;
   message?: string;
+  data: Array<{
+    pattern: string;
+    type: PatternType;
+    selector: string;
+    items: any[];
+  }>;
 }
 
-// Mock implementation for client-side preview
-// In a real implementation, this would make API calls to a backend
+// In a real application, this would call an API endpoint
 export const scrapeWebsite = async (request: ScrapeRequest): Promise<ScrapeResult> => {
-  console.log('Scrape request:', request);
+  console.log('Scraping website:', request.url);
+  console.log('With patterns:', request.patterns);
+  console.log('And options:', request.options);
+  
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 1500));
   
   try {
-    // This would be replaced with actual API call in production
-    // For now, we'll simulate a response based on the patterns
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+    // This is a mock implementation that would be replaced by actual API calls
+    // For demo purposes, we'll generate some fake data based on the patterns
     
-    // Generate mock results based on pattern types
-    const mockData = request.patterns.map(pattern => {
-      let items: any[] = [];
-      
-      // Generate different mock data based on pattern type
-      switch (pattern.type) {
-        case 'css':
-          items = generateMockCssResults(pattern.selector, 3);
-          break;
-        case 'xpath':
-          items = generateMockXPathResults(pattern.selector, 3);
-          break;
-        case 'regex':
-          items = generateMockRegexResults(pattern.selector, 3);
-          break;
-        case 'json':
-          items = generateMockJsonResults(pattern.selector, 3);
-          break;
-        case 'auto':
-          items = generateMockAutoResults(request.url, 3);
-          break;
-      }
-      
-      return {
-        pattern: pattern.name,
-        type: pattern.type,
-        selector: pattern.selector,
-        items
-      };
-    });
+    if (Math.random() < 0.1) {
+      // Simulate occasional errors
+      throw new Error('Network error or server refused the connection');
+    }
     
-    // In real implementation, save to local storage or database
     const result: ScrapeResult = {
-      id: generateId(),
-      timestamp: Date.now(),
+      status: 'success',
+      timestamp: new Date().toISOString(),
       url: request.url,
-      data: mockData,
-      status: 'success'
+      data: request.patterns.map(pattern => {
+        // Generate fake items based on pattern type
+        const itemCount = Math.floor(Math.random() * 10) + 1;
+        const items = Array(itemCount).fill(0).map((_, index) => {
+          if (pattern.type === 'css' || pattern.type === 'xpath') {
+            return {
+              id: `item-${index}`,
+              text: `Sample text for ${pattern.name} #${index + 1}`,
+              href: index % 2 === 0 ? `https://example.com/item-${index}` : null,
+              html: request.options.includeHtml ? `<div class="sample">Sample HTML for ${pattern.name} #${index + 1}</div>` : undefined,
+            };
+          } else if (pattern.type === 'regex') {
+            return {
+              id: `item-${index}`,
+              match: `Match ${index + 1} for ${pattern.name}`,
+              groups: [`group1-${index}`, `group2-${index}`],
+            };
+          } else if (pattern.type === 'json') {
+            return {
+              id: `item-${index}`,
+              value: { key: `value-${index}`, nested: { data: `nested-${index}` } },
+            };
+          } else {
+            return {
+              id: `item-${index}`,
+              content: `Content for ${pattern.name} #${index + 1}`,
+            };
+          }
+        });
+        
+        return {
+          pattern: pattern.name,
+          type: pattern.type,
+          selector: pattern.selector,
+          items,
+        };
+      }),
     };
     
-    // Save to history in localStorage
-    saveToHistory(result);
+    // Save to local storage for history
+    const historyItems = JSON.parse(localStorage.getItem('scrapeHistory') || '[]');
+    historyItems.unshift(result);
+    localStorage.setItem('scrapeHistory', JSON.stringify(historyItems.slice(0, 10)));
     
     return result;
   } catch (error) {
-    console.error('Scrape error:', error);
+    console.error('Error in scrapeWebsite:', error);
+    
     return {
-      id: generateId(),
-      timestamp: Date.now(),
-      url: request.url,
-      data: [],
       status: 'error',
-      message: error instanceof Error ? error.message : 'Unknown error occurred'
+      timestamp: new Date().toISOString(),
+      url: request.url,
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      data: [],
     };
   }
 };
 
-// History management
-export const getHistory = (): ScrapeResult[] => {
+// Function to get scrape history from local storage
+export const getScrapeHistory = (): ScrapeResult[] => {
   try {
-    const history = localStorage.getItem('scrape_history');
-    return history ? JSON.parse(history) : [];
-  } catch (e) {
-    console.error('Error loading scrape history:', e);
+    return JSON.parse(localStorage.getItem('scrapeHistory') || '[]');
+  } catch (error) {
+    console.error('Error getting scrape history:', error);
     return [];
   }
 };
 
-export const saveToHistory = (result: ScrapeResult): void => {
-  try {
-    const history = getHistory();
-    const updatedHistory = [result, ...history].slice(0, 20); // Keep only last 20 items
-    localStorage.setItem('scrape_history', JSON.stringify(updatedHistory));
-  } catch (e) {
-    console.error('Error saving to history:', e);
-  }
-};
-
-export const clearHistory = (): void => {
-  localStorage.removeItem('scrape_history');
-};
-
-// Helper functions for generating mock data
-const generateId = (): string => {
-  return Math.random().toString(36).substring(2, 11);
-};
-
-const generateMockCssResults = (selector: string, count: number): any[] => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `item-${i+1}`,
-    element: selector.split(' ').pop() || 'div',
-    text: `Content for ${selector} - Item ${i+1}`,
-    attributes: {
-      class: `sample-class-${i+1}`,
-      id: `sample-id-${i+1}`
-    }
-  }));
-};
-
-const generateMockXPathResults = (selector: string, count: number): any[] => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `node-${i+1}`,
-    nodeName: selector.includes('@') ? 'attribute' : 'element',
-    text: `XPath result ${i+1} for ${selector}`,
-    path: `/html/body/div[${i+1}]`
-  }));
-};
-
-const generateMockRegexResults = (pattern: string, count: number): any[] => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `match-${i+1}`,
-    text: `Match ${i+1} for pattern ${pattern}`,
-    position: { start: i * 100, end: i * 100 + 50 }
-  }));
-};
-
-const generateMockJsonResults = (path: string, count: number): any[] => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `json-${i+1}`,
-    path: `${path}[${i}]`,
-    value: { name: `Item ${i+1}`, id: i+1, active: Math.random() > 0.5 }
-  }));
-};
-
-const generateMockAutoResults = (url: string, count: number): any[] => {
-  // Generate different types of results based on URL pattern
-  if (url.includes('product') || url.includes('shop')) {
-    return Array.from({ length: count }, (_, i) => ({
-      id: `product-${i+1}`,
-      name: `Product ${i+1}`,
-      price: `$${(19.99 + i * 10).toFixed(2)}`,
-      rating: (Math.random() * 5).toFixed(1)
-    }));
-  } else if (url.includes('article') || url.includes('blog')) {
-    return Array.from({ length: count }, (_, i) => ({
-      id: `article-${i+1}`,
-      title: `Article ${i+1}`,
-      date: new Date(Date.now() - i * 86400000).toISOString().split('T')[0],
-      excerpt: `This is a sample excerpt for article ${i+1}...`
-    }));
-  } else {
-    return Array.from({ length: count }, (_, i) => ({
-      id: `item-${i+1}`,
-      type: 'Auto-detected content',
-      content: `Content item ${i+1} from ${url}`
-    }));
-  }
+// Function to clear scrape history
+export const clearScrapeHistory = (): void => {
+  localStorage.removeItem('scrapeHistory');
 };
