@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Clock, RefreshCw, Trash2, ExternalLink } from "lucide-react";
-import { ScrapeResult, getHistory, clearHistory } from "@/utils/scrapeService";
+import { ScrapeResult, getScrapeHistory, clearScrapeHistory } from "@/utils/scrapeService";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,11 +23,11 @@ const HistoryDrawer = ({ onSelectResult }: HistoryDrawerProps) => {
   }, [open]);
 
   const refreshHistory = () => {
-    setHistory(getHistory());
+    setHistory(getScrapeHistory());
   };
 
   const handleClearHistory = () => {
-    clearHistory();
+    clearScrapeHistory();
     setHistory([]);
   };
 
@@ -72,7 +72,7 @@ const HistoryDrawer = ({ onSelectResult }: HistoryDrawerProps) => {
               {history.length > 0 ? (
                 history.map((item, index) => (
                   <motion.div 
-                    key={item.id}
+                    key={`${item.url}-${item.timestamp}`}
                     className={`border rounded-lg p-3 ${item.status === 'error' ? 'border-destructive/30' : 'hover:border-primary/40'} transition-colors cursor-pointer`}
                     onClick={() => handleSelectResult(item)}
                     initial={{ opacity: 0, y: 10 }}
